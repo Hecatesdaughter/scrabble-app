@@ -8,7 +8,6 @@ import random
 def load_words(filename):
     with open(filename, 'r') as file:
         return [line.strip().upper() for line in file]
-    
 
 # Validate if a word is in the dictionary
 def is_valid_word(word, word_list):
@@ -17,11 +16,9 @@ def is_valid_word(word, word_list):
 # Generate a valid random word from the computer's rack
 def generate_computer_word(rack, word_list):
     rack_letters = [tile.get_letter() for tile in rack]
-    random.shuffle(rack_letters) # shuffling happens once
-    # Iterating through each word, check if char in word match char in the rack
+    random.shuffle(rack_letters)
     for word in word_list:
         if all(rack_letters.count(char) >= word.count(char) for char in word):
-            # Return valid word
             return word
     return None
 
@@ -32,38 +29,6 @@ def generate_hint(rack, word_list):
         if all(rack_letters.count(char) >= word.count(char) for char in word):
             return word
     return None
-
-# Function to check valid placement considering existing tiles and score calculation
-def check_valid_placement(word, position, direction, board, rack_arr):
-    row, col = position
-    score = 0
-    word_length = len(word)
-    if direction not in ['right', 'down']:
-        return False, 0
-
-    if (direction == 'right' and col + word_length > 15) or (direction == 'down' and row + word_length > 15):
-        return False, 0
-
-    # Ensure connection to existing tiles
-    connects = False
-    temp_rack_arr = list(rack_arr)
-
-    for i, letter in enumerate(word):
-        new_row, new_col = (row, col + i) if direction == 'right' else (row + i, col)
-        if board.board[new_row][new_col].strip():  # Check if the board position is not empty
-            if board.board[new_row][new_col].strip() != letter:
-                return False, 0
-            connects = True
-        else:
-            if letter not in temp_rack_arr:
-                return False, 0
-            temp_rack_arr.remove(letter)
-            score += ord(letter) - ord('A') + 1
-
-    if not connects and not board.board[7][7].strip():  # Check if the center star is covered
-        return False, 0
-
-    return True, score
 
 def main():
     # Load words from the dictionary.txt
@@ -79,6 +44,7 @@ def main():
     current_player_index = 0
     # Initialize pass count to track consecutive passes
     pass_count = [0]  # Using a list to keep track of pass count
+    first_turn = True
 
     # Display the current state of the game
     def print_game_state():
@@ -89,7 +55,7 @@ def main():
         print(f"Remaining tiles in bag: {tile_bag.get_remaining_tiles()}")
 
     # Human player's turn with an option to pass a play turn or request for a hint
-    def human_turn():
+    def human_turn(first_turn):
         print("Human's turn")
         print_game_state()
         while True:
@@ -108,11 +74,21 @@ def main():
                 direction = input("Enter direction (right/down): ").lower()
                 row = int(input("Enter starting row (0-14): "))
                 col = int(input("Enter starting column (0-14): "))
+
+                if first_turn and (row != 7 or col != 7):
+                    print("You must start from the center tile (row 7, column 7) on the first turn. Please try again.")
+                    continue
+
+                # Check if the placement is valid (pass the players list)
+                if not board.is_valid_placement(word, (row, col), direction, first_turn, players):
+                    print("Invalid placement. Please try again.")
+                    continue
+
                 board.place_word(word, (row, col), direction, human_player)
                 pass_count[0] = 0
                 return 'played'
 
-    # Computer player's turn
+    # Human player's turn with an option to pass a play turn or request for a hint
     def computer_turn():
         print("Computer's turn")
         rack_arr = computer_player.get_rack_arr()
@@ -127,28 +103,27 @@ def main():
                 row = random.randint(0, 14)
                 col = random.randint(0, 14)
 
+                # Check if the word fits on the board
                 if direction == 'right' and col + word_length <= 15:
-                    is_valid, score = check_valid_placement(word, (row, col), direction, board, rack_arr)
-                    if is_valid:
-                        valid_placement = True
+                    valid_placement = True
                 elif direction == 'down' and row + word_length <= 15:
-                    is_valid, score = check_valid_placement(word, (row, col), direction, board, rack_arr)
-                    if is_valid:
-                        valid_placement = True
+                    valid_placement = True
 
                 attempts += 1
 
+            # Place the word on the board
             if valid_placement:
                 board.place_word(word, (row, col), direction, computer_player)
-                computer_player.update_score(score)
                 print(f"Computer placed: {word} at ({row}, {col}) {direction}")
                 pass_count[0] = 0
                 return 'played'
             else:
+                # Computer could not find a valid placement
                 print("Computer could not find a valid position to place the word.")
                 pass_count[0] += 1
                 return 'pass'
         else:
+            # Computer could not find a valid word
             print("Computer could not find a valid word to play.")
             pass_count[0] += 1
             return 'pass'
@@ -157,12 +132,14 @@ def main():
     while True:
         current_player = players[current_player_index]
         if current_player == human_player:
-            human_turn()
+            result = human_turn(first_turn)
+            if result == 'played':
+                first_turn = False  # Set first_turn to False after the first successful play
         else:
             computer_turn()
 
         # Check for game over conditions
-        if pass_count[0] >= 2:
+        if pass_count [0] >= 2:
             print("Both players passed. Game over!")
             break
 
@@ -181,4 +158,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

@@ -35,6 +35,7 @@ class Board:
 
         # Add separator after each row (including the last one)
             board_str += separator + "\n"           
+
         return board_str
  
     def add_premium_squares(self):

@@ -1,5 +1,4 @@
 from .logic import calculate_word_score
-from .PlayerClass import Player
 class Board:
     """
     Creates the Scrabble board.
@@ -24,7 +23,7 @@ class Board:
 
         # Iterate through each row of the board
         for i in range(15):
- 
+
         # Construct the row header (row number) and content with cell values
             row_header = f"{i:<2} | "
             row_content = " | ".join(f"{self.board[i][j]:<{cell_width}}" for j in range(15))
@@ -37,14 +36,14 @@ class Board:
             board_str += separator + "\n"           
 
         return board_str
- 
+
     def add_premium_squares(self):
         """
-         Adds all of the premium squares that influence the word's score.
-         TW- Triple Word Score
-         DW- Double Word Score
-         TL- Triple Letter Score
-         DL- Double Letter Score
+        Adds all of the premium squares that influence the word's score.
+        TW- Triple Word Score
+        DW- Double Word Score
+        TL- Triple Letter Score
+        DL- Double Letter Score
         """
         premium_squares = {
             (0, 0): "TW", (7, 0): "TW", (14, 0): "TW",
@@ -116,11 +115,11 @@ class Board:
             return "Location out of bounds."
 
         # Ensure first turn rule
-        if round_number == 1 and players[0] == players and location != [7, 7]:
+        if first_turn and location != (7,7):
             return "The first turn must begin at location (7, 7)."
 
         # Check if the word connects to existing words on the board
-        if (round_number != 1 or (round_number == 1 and players[0] != players)) and current_board_ltr == " " * len(word):
+        if not first_turn and current_board_ltr == " " * len(word):
             return "Please connect the word to a previously played letter."
 
         return True
@@ -170,6 +169,3 @@ class Board:
                 if tile.get_letter() == letter:
                     player.remove_from_rack(tile)
         player.replenish_rack()
-
-
-   

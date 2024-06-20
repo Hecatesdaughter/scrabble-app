@@ -66,7 +66,7 @@ class Board:
         for (x, y), value in premium_squares.items():
             self.board[x][y] = f" {value} "
 
-    def is_valid_placement(self, word, location, direction, round_number, first_turn, players):
+    def is_valid_placement(self, word, location, direction, first_turn, players):
         x, y = location
 
         if direction not in ["right", "down"]:
@@ -124,32 +124,6 @@ class Board:
 
         return True
 
-    def check_adjacent_words(self, word, location, direction):
-        x, y = location
-        for i, letter in enumerate(word):
-            adj_x, adj_y = (x, y + i) if direction == "right" else (x + i, y)
-            if direction == "right":
-                if (adj_x > 0 and self.board[adj_x - 1][adj_y].strip()) or (adj_x < 14 and self.board[adj_x + 1][adj_y].strip()):
-                    return True
-            elif direction == "down":
-                if (adj_y > 0 and self.board[adj_x][adj_y - 1].strip()) or (adj_y < 14 and self.board[adj_x][adj_y + 1].strip()):
-                    return True
-        return False
-
-    def can_place_word(self, word, location, direction):
-        x, y = location
-        if direction not in ["right", "down"]:
-            return False
-
-        for i, letter in enumerate(word):
-            if direction == "right":
-                if y + i >= 15 or (self.board[x][y + i].strip() and self.board[x][y + i].strip() != letter):
-                    return False
-            elif direction == "down":
-                if x + i >= 15 or (self.board[x + i][y].strip() and self.board[x + i][y].strip() != letter):
-                    return False
-        return True
-
     def place_word(self, word, location, direction, player):
         x, y = location
         for i, letter in enumerate(word):
@@ -169,3 +143,5 @@ class Board:
                 if tile.get_letter() == letter:
                     player.remove_from_rack(tile)
         player.replenish_rack()
+
+

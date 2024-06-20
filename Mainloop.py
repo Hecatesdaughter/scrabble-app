@@ -45,7 +45,6 @@ def main():
     # Initialize pass count to track consecutive passes
     pass_count = [0]  # Using a list to keep track of pass count
     first_turn = True
-    round_number = 1
 
     # Display the current state of the game
     def print_game_state():
@@ -80,7 +79,7 @@ def main():
                     print("You must start from the center tile (row 7, column 7). Please try again.")
                     continue
 
-                if not board.is_valid_placement(word, (row, col), direction, 1 if first_turn else 2, first_turn, human_player):
+                if not board.is_valid_placement(word, (row, col), direction, first_turn, human_player):
                     print("Invalid placement. Please try again.")
                     continue
 
@@ -106,10 +105,10 @@ def main():
 
                 # Check if the word fits on the board and is valid
                 if direction == 'right' and col + word_length <= 15:
-                    if board.is_valid_placement(word, (row, col), direction, 1 if first_turn else 2, first_turn, computer_player):
+                    if board.is_valid_placement(word, (row, col), direction, first_turn, computer_player):
                         valid_placement = True
                 elif direction == 'down' and row + word_length <= 15:
-                    if board.is_valid_placement(word, (row, col), direction, 1 if first_turn else 2, first_turn, computer_player):
+                    if board.is_valid_placement(word, (row, col), direction, first_turn, computer_player):
                         valid_placement = True
 
                 attempts += 1
